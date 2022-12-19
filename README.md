@@ -50,8 +50,10 @@ md.use(LinkToHtml, {
         return {
             tag: "RouterLink",
             href: "to",
-            isInline: false,
+            isInline: true,
         };
     },
 });
 ```
+
+[MIT](./LICENSE) License
