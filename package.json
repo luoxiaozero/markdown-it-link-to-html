@@ -1,6 +1,6 @@
 {
     "name": "markdown-it-link-to-html",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Markdown It plugin",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
