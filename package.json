@@ -1,0 +1,25 @@
+{
+  "name": "markdown-it-link-to-html",
+  "version": "0.0.0",
+  "description": "Markdown It plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "markdown-it",
+    "markdown-it-plugin",
+    "link",
+    "html"
+  ],
+  "author": "luoxiaozero",
+  "license": "MIT",
+  "homepage": "https://github.com/luoxiaozero/markdown-it-link-to-html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luoxiaozero/markdown-it-link-to-html"
+  },
+  "devDependencies": {
+    "markdown-it": "^13.0.1"
+  }
+}
