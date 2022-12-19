@@ -1,6 +1,6 @@
 import MarkdownItLinkToHtml from "../src";
 import MarkdownIt from "markdown-it";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 
 it("test base", () => {
     const env = "test";
