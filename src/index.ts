@@ -5,6 +5,7 @@ export { blockElements, inlineElements } from "./element";
 type ReplaceLink = (href: string) =>
     | {
           tag: keyof HTMLElementTagNameMap | string;
+          href?: string,
           isInline: boolean;
       }
     | undefined;
@@ -33,7 +34,7 @@ function linkOpenToHtml(
     }
     let htmlInfo = replaceLink(href);
     if (!htmlInfo) return undefined;
-    let { tag, isInline } = htmlInfo;
+    let { tag, isInline, href: hrefName = "href" } = htmlInfo;
     let openToken: Token, closeToken: Token;
     if (isInline) {
         openToken = new Token("html_inline", "", 1);
@@ -46,7 +47,8 @@ function linkOpenToHtml(
         closeToken = new Token("html_block", "", -1);
         closeToken.block = true;
     }
-    openToken.content = `<${tag} href="${href}" title="${title}">`;
+
+    openToken.content = title ? `<${tag} ${hrefName}="${href}" title="${title}">`: `<${tag} ${hrefName}="${href}">`;
     closeToken.content = `</${tag}>`;
 
     return [openToken, closeToken];
