@@ -2,22 +2,21 @@ import type MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token";
 export { blockElements, inlineElements } from "./element";
 
-type ReplaceLink = (href: string) => {
-    tag: keyof HTMLElementTagNameMap | string;
-    isInline: boolean;
-};
+type ReplaceLink = (href: string) =>
+    | {
+          tag: keyof HTMLElementTagNameMap | string;
+          isInline: boolean;
+      }
+    | undefined;
 
 interface Options {
-    replaceLink: (href: string) => {
-        tag: keyof HTMLElementTagNameMap | string;
-        isInline: boolean;
-    };
+    replaceLink: ReplaceLink;
 }
 
 function linkOpenToHtml(
     replaceLink: ReplaceLink,
     lineOpen: Token
-): [Token, Token] {
+): [Token, Token] | undefined {
     let href = "",
         title = "";
     if (lineOpen.attrs) {
@@ -32,7 +31,9 @@ function linkOpenToHtml(
             }
         }
     }
-    let { tag, isInline } = replaceLink(href);
+    let htmlInfo = replaceLink(href);
+    if (!htmlInfo) return undefined;
+    let { tag, isInline } = htmlInfo;
     let openToken: Token, closeToken: Token;
     if (isInline) {
         openToken = new Token("html_inline", "", 1);
@@ -59,7 +60,7 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
         return;
     }
     markdownit.core.ruler.after("inline", "replack-link-to-html", (state) => {
-        state.tokens.forEach(token => {
+        state.tokens.forEach((token) => {
             if (token.type === "inline" && token.children) {
                 let linkOpenIndexList: number[] = [];
                 let linkCloseIndexList: number[] = [];
@@ -83,7 +84,7 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
                         afterChildren = token.children!.slice(0, linkOpenIndex);
                     } else {
                         afterChildren = token.children!.slice(
-                            linkCloseIndexList[linkOpenIndex - 1] + 1,
+                            linkCloseIndexList[index - 1] + 1,
                             linkOpenIndex
                         );
                     }
@@ -92,14 +93,24 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
                         options.replaceLink,
                         token.children![linkOpenIndex]
                     );
-                    children.push(html[0]);
 
-                    let contentChildren = token.children!.slice(
-                        linkOpenIndex + 1,
-                        linkCloseIndexList[index]
-                    );
-                    children.push(...contentChildren);
-                    children.push(html[1]);
+                    if (html) {
+                        children.push(html[0]);
+
+                        let contentChildren = token.children!.slice(
+                            linkOpenIndex + 1,
+                            linkCloseIndexList[index]
+                        );
+                        children.push(...contentChildren);
+
+                        children.push(html[1]);
+                    } else {
+                        let contentChildren = token.children!.slice(
+                            linkOpenIndex,
+                            linkCloseIndexList[index] + 1
+                        );
+                        children.push(...contentChildren);
+                    }
                 });
 
                 if (
