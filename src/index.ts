@@ -59,7 +59,7 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
         return;
     }
     markdownit.core.ruler.after("inline", "replack-link-to-html", (state) => {
-        state.tokens.forEach((token, index) => {
+        state.tokens.forEach(token => {
             if (token.type === "inline" && token.children) {
                 let linkOpenIndexList: number[] = [];
                 let linkCloseIndexList: number[] = [];
