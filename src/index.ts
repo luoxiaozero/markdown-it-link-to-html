@@ -6,7 +6,11 @@ type ReplaceLink = (href: string, info: { linkify: boolean, title: string }) =>
           tag: keyof HTMLElementTagNameMap | string;
           hrefName?: string,
           href?: string,
+          title?: string,
           block?: boolean;
+          attrs?: {
+            [key: string]: string
+          }
       }
     | undefined;
 
@@ -35,9 +39,11 @@ function linkOpenToHtml(
     }
     let htmlInfo = replaceLink(href, { linkify: lineOpen.markup === "linkify", title });
     if (!htmlInfo) return null;
-    let { tag, block = false, hrefName = "href", href: hrefValue } = htmlInfo;
+    let { tag, block = false, hrefName = "href", href: hrefValue, title: titleValue, attrs } = htmlInfo;
 
     if (hrefValue !== undefined) href = hrefValue;
+    if (titleValue !== undefined) title = titleValue
+    
     let type = block ? "html_inline" : "html_inline";
     let openToken = new Token(type, "", 1);
     let closeToken = new Token(type, "", -1);
@@ -45,7 +51,16 @@ function linkOpenToHtml(
     openToken.block = block;
     closeToken.block = block;
 
-    openToken.content = title ? `<${tag} ${hrefName}="${href}" title="${title}">`: `<${tag} ${hrefName}="${href}">`;
+    openToken.content = title ? `<${tag} ${hrefName}="${href}" title="${title}"`: `<${tag} ${hrefName}="${href}"`;
+    if (attrs !== undefined) {
+        Object.entries(attrs).forEach(value => {
+            if (value[0] === hrefName || value[0] === "title") {
+                return;
+            }
+            openToken.content += ` ${value[0]}="${value[1]}"`
+        })
+    }
+    openToken.content += ">";
     closeToken.content = `</${tag}>`;
 
     return [openToken, closeToken];
