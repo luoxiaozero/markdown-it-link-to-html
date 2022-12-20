@@ -54,4 +54,29 @@ md.use(LinkToHtml, {
 });
 ```
 
+3. 
+
+```js
+import MarkdownIt from "markdown-it";
+import LinkToHtml from "markdown-it-link-to-html";
+
+const md = MarkdownIt();
+
+md.use(LinkToHtml, {
+    linkify: true, // To deal AutoLink
+    replaceLink: (href) => {
+        return {
+            tag: "RouterLink", // Modify RouterLink to tag,Required.
+            hrefName: "to", // Modify href key to to
+            href: "/", //  Modify href value to /
+            title: "hi", //  Modify title value to hi
+            // Add attribute,But the key can't be href or title
+            attrs: { 
+                class: "p1"
+            }
+        };
+    },
+});
+```
+
 [MIT](./LICENSE) License
