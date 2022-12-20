@@ -1,6 +1,6 @@
 # markdown-it-link-to-html
 
-The link changes to HTML
+Link conversion to HTML
 
 `[me](https://me.me)`
 
@@ -28,7 +28,6 @@ md.use(LinkToHtml, {
             /// href is https, return ReplaceLink
             return {
                 tag: "ReplaceLink",
-                isInline: false,
             };
         }
         /// href is no https, don't change
@@ -49,8 +48,7 @@ md.use(LinkToHtml, {
     replaceLink: (href) => {
         return {
             tag: "RouterLink",
-            href: "to",
-            isInline: true,
+            hrefName: "to",
         };
     },
 });

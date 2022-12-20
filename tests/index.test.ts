@@ -12,7 +12,6 @@ it("test base", () => {
         replaceLink: (href) => {
             return {
                 tag: "ReplaceLink",
-                isInline: false,
             };
         },
     });
@@ -25,6 +24,53 @@ it("test base", () => {
     );
 });
 
+describe("test autolink", () => {
+    it("test autolink", () => {
+        const env = "test";
+        let mdIt = new MarkdownIt({
+            html: true,
+            linkify: true
+        });
+
+        mdIt.use(MarkdownItLinkToHtml, {
+            replaceLink: (href) => {
+                return {
+                    tag: "ReplaceLink",
+                };
+            },
+        });
+
+        let tokes = mdIt.parse("https://me.me", env);
+        let html = mdIt.renderer.render(tokes, {}, env);
+        
+        expect(html).toEqual(
+            `<p><a href="https://me.me">https://me.me</a></p>\n`
+        );
+    });
+    it("test autolink linkify enabled", () => {
+        const env = "test";
+        let mdIt = new MarkdownIt({
+            html: true,
+            linkify: true
+        });
+
+        mdIt.use(MarkdownItLinkToHtml, {
+            linkify: true,
+            replaceLink: (href) => {
+                return {
+                    tag: "ReplaceLink",
+                };
+            },
+        });
+
+        let tokes = mdIt.parse("https://me.me", env);
+        let html = mdIt.renderer.render(tokes, {}, env);
+
+        expect(html).toEqual(
+            `<p><ReplaceLink href="https://me.me"></ReplaceLink></p>\n`
+        );
+    });
+});
 
 it("test href", () => {
     const env = "test";
@@ -36,8 +82,7 @@ it("test href", () => {
         replaceLink: (href) => {
             return {
                 tag: "ReplaceLink",
-                isInline: false,
-                href: "to"
+                hrefName: "to"
             };
         },
     });
@@ -62,7 +107,6 @@ describe("test replaceLink", () => {
                 if (href.startsWith("https")) {
                     return {
                         tag: "ReplaceLink",
-                        isInline: false,
                     };
                 }
                 return undefined;
@@ -89,7 +133,6 @@ describe("test replaceLink", () => {
                 if (href.startsWith("https")) {
                     return {
                         tag: "ReplaceLink",
-                        isInline: false,
                     };
                 }
                 return undefined;
