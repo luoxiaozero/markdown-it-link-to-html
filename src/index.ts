@@ -1,10 +1,11 @@
 import type MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token";
 
-type ReplaceLink = (href: string) =>
+type ReplaceLink = (href: string, info: { linkify: boolean, title: string }) =>
     | {
           tag: keyof HTMLElementTagNameMap | string;
           hrefName?: string,
+          href?: string,
           block?: boolean;
       }
     | undefined;
@@ -32,10 +33,11 @@ function linkOpenToHtml(
             }
         }
     }
-    let htmlInfo = replaceLink(href);
+    let htmlInfo = replaceLink(href, { linkify: lineOpen.markup === "linkify", title });
     if (!htmlInfo) return null;
-    let { tag, block = false, hrefName = "href" } = htmlInfo;
+    let { tag, block = false, hrefName = "href", href: hrefValue } = htmlInfo;
 
+    if (hrefValue !== undefined) href = hrefValue;
     let type = block ? "html_inline" : "html_inline";
     let openToken = new Token(type, "", 1);
     let closeToken = new Token(type, "", -1);
@@ -64,15 +66,15 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
                     let shielding = false;
                     let html: [Token, Token] | null = null;
                     token.children.forEach((t) => {
-                        if (t.type == "link_open") {
+                        if (t.type === "link_open") {
                             html = linkOpenToHtml(options.replaceLink, t);
                             if (html) {
                                 children.push(html[0]);
-                                if (t.markup == "linkify") shielding = true;
+                                if (t.markup === "linkify") shielding = true;
                             } else {
                                 children.push(t);
                             }
-                        } else if (t.type == "link_close") {
+                        } else if (t.type === "link_close") {
                             children.push(html![1]);
                             shielding = false;
                         } else if (!shielding){
@@ -85,12 +87,12 @@ const MarkdownItLinkToHtml: MarkdownIt.PluginWithOptions<Options> = (
                     let len = token.children.length;
                     for (let index = 0; index < len; index++) {
                         let t = token.children[index];
-                        if (t.type == "link_open" && t.markup != "linkify") {
+                        if (t.type === "link_open" && t.markup !== "linkify") {
                             html = linkOpenToHtml(options.replaceLink, t);
                             if (html) {
                                 token.children[index] = html[0];
                             }
-                        } else if (t.type == "link_close" && t.markup != "linkify") {
+                        } else if (t.type === "link_close" && t.markup !== "linkify") {
                             if (html) {
                                 token.children[index] = html[1];
                             }

@@ -33,7 +33,9 @@ describe("test autolink", () => {
         });
 
         mdIt.use(MarkdownItLinkToHtml, {
-            replaceLink: (href) => {
+            replaceLink: (href, { linkify, title }) => {
+                expect(linkify).toBe(true)
+                expect(title).toBe(undefined)
                 return {
                     tag: "ReplaceLink",
                 };
@@ -56,7 +58,8 @@ describe("test autolink", () => {
 
         mdIt.use(MarkdownItLinkToHtml, {
             linkify: true,
-            replaceLink: (href) => {
+            replaceLink: (href, { linkify }) => {
+                expect(linkify).toBe(true)
                 return {
                     tag: "ReplaceLink",
                 };
@@ -72,14 +75,15 @@ describe("test autolink", () => {
     });
 });
 
-it("test href", () => {
+it("test hrefName", () => {
     const env = "test";
     let mdIt = new MarkdownIt({
         html: true,
     });
 
     mdIt.use(MarkdownItLinkToHtml, {
-        replaceLink: (href) => {
+        replaceLink: (href, { title }) => {
+            expect(title).toBe("title")
             return {
                 tag: "ReplaceLink",
                 hrefName: "to"
@@ -92,6 +96,30 @@ it("test href", () => {
 
     expect(html).toEqual(
         `<p><ReplaceLink to="https://me.me" title="title">me</ReplaceLink></p>\n`
+    );
+});
+
+it("test href", () => {
+    const env = "test";
+    let mdIt = new MarkdownIt({
+        html: true,
+    });
+
+    mdIt.use(MarkdownItLinkToHtml, {
+        replaceLink: (href) => {
+            return {
+                tag: "ReplaceLink",
+                hrefName: "to",
+                href: "https://link.me.me?href=" + href
+            };
+        },
+    });
+
+    let tokes = mdIt.parse("[me](https://me.me 'title')", env);
+    let html = mdIt.renderer.render(tokes, {}, env);
+
+    expect(html).toEqual(
+        `<p><ReplaceLink to="https://link.me.me?href=https://me.me" title="title">me</ReplaceLink></p>\n`
     );
 });
 
